@@ -1,3 +1,4 @@
+package othello;
 
 public class OthelloController {
     private int[][] game; // 0 empty, 1 black, 2 white
