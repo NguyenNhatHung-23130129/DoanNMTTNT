@@ -3,11 +3,14 @@ package othello;
 public class Board {
     private int rows;
     private int columns;
+
     private Piece[][] board;
+
 
     public Board(int rows, int columns) {
         this.rows = rows;
         this.columns = columns;
+
         this.board = new Piece[rows][columns];
 
     }
@@ -54,4 +57,5 @@ public class Board {
         return row >= 0 && row < rows && col >= 0 && col < columns;
     }
 
+   
 }
