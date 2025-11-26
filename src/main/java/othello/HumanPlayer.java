@@ -5,6 +5,7 @@ public class HumanPlayer extends Player {
         super(name, piece);
     }
 
+
     @Override
     public boolean makeMove(Board board, int column, int row) {
         return false;
