@@ -8,4 +8,6 @@ module vn.edu.hcmuaf.fit.doannmttnt {
     opens vn.edu.hcmuaf.fit.doannmttnt to javafx.fxml;
     exports vn.edu.hcmuaf.fit.doannmttnt;
     opens othello to javafx.graphics;
+    exports othello;
+
 }
