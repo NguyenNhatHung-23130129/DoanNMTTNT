@@ -9,10 +9,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 
-
-
-
-
 public class OthelloView extends Application {
     private Stage stage;
     private Scene scene;
@@ -26,7 +22,7 @@ public class OthelloView extends Application {
     public void start(Stage primaryStage) {
         this.stage = primaryStage;
         showBoardUI(DEFAULT_SIZE, DEFAULT_SIZE);
-        placeInitialDiscs(); // đặt 4 quân cờ khởi đầu
+        placeInitialPieces(); // đặt 4 quân cờ khởi đầu
         stage.setTitle("Othello");
         stage.setScene(scene);
         stage.show();
@@ -47,10 +43,7 @@ public class OthelloView extends Application {
                 cell.setPrefSize(CELL_SIZE, CELL_SIZE);
                 cell.setMinSize(CELL_SIZE, CELL_SIZE);
                 cell.setMaxSize(CELL_SIZE, CELL_SIZE);
-                cell.setStyle(
-                        "-fx-background-color: #2E8B57; " +
-                                "-fx-border-color: black; " +
-                                "-fx-border-width: 1;"
+                cell.setStyle("-fx-background-color: #2E8B57; " + "-fx-border-color: black; " + "-fx-border-width: 1;"
                 );
 
                 cellButtons[r][c] = cell;
@@ -62,22 +55,22 @@ public class OthelloView extends Application {
     }
 
     // Đặt 4 quân cờ khởi đầu
-    private void placeInitialDiscs() {
-        setDiscAt(3, 3, Color.WHITESMOKE);
-        setDiscAt(4, 4, Color.WHITESMOKE);
-        setDiscAt(3, 4, Color.BLACK);
-        setDiscAt(4, 3, Color.BLACK);
+    private void placeInitialPieces() {
+        setPieceAt(3, 3, Color.WHITESMOKE);
+        setPieceAt(4, 4, Color.WHITESMOKE);
+        setPieceAt(3, 4, Color.BLACK);
+        setPieceAt(4, 3, Color.BLACK);
         // currentBlack = true; // giữ black đi trước
     }
 
-    private void setDiscAt(int row, int col, Color color) {
+    private void setPieceAt(int row, int col, Color color) {
         if (row < 0 || row >= cellButtons.length || col < 0 || col >= cellButtons[0].length) return;
         Button cell = cellButtons[row][col];
         if (cell == null) return;
-        Circle disc = new Circle(CELL_SIZE * 0.35);
-        disc.setFill(color);
-        disc.setStroke(color == Color.BLACK ? Color.web("#222") : Color.web("#ccc"));
-        cell.setGraphic(disc);
+        Circle piece = new Circle(CELL_SIZE * 0.35);
+        piece.setFill(color);
+        piece.setStroke(color == Color.BLACK ? Color.web("#222") : Color.web("#ccc"));
+        cell.setGraphic(piece);
     }
 
     public static void main(String[] args) {

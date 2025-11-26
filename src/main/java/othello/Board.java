@@ -11,4 +11,5 @@ public class Board {
         this.grid = new int[rows][columns];
     }
 
+
 }
