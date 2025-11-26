@@ -1,3 +1,5 @@
+package othello;
+
 public class Board {
     private int rows;
     private int columns;
@@ -8,5 +10,6 @@ public class Board {
         this.columns = columns;
         this.grid = new int[rows][columns];
     }
+
 
 }

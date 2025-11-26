@@ -1,3 +1,5 @@
+package othello;
+
 public class PlayingState implements GameState {
     private GameEndStrategy gameEndStrategy;
 

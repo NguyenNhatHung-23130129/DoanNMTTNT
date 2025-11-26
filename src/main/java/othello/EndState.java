@@ -1,3 +1,5 @@
+package othello;
+
 public class EndState implements GameState {
     @Override
     public boolean makeMove(Game game, int column, int row) {
@@ -6,6 +8,6 @@ public class EndState implements GameState {
 
     @Override
     public String getState() {
-        return "Game Over";
+        return "d.Game Over";
     }
 }

@@ -1,3 +1,5 @@
+package othello;
+
 public abstract class Player {
     private String name;
     private int piece;
