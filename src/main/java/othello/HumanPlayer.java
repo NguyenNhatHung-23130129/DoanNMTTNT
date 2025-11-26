@@ -1,7 +1,7 @@
 package othello;
 
 public class HumanPlayer extends Player {
-    public HumanPlayer(String name, int piece) {
+    public HumanPlayer(String name, Piece piece) {
         super(name, piece);
     }
 

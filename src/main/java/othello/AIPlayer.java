@@ -1,7 +1,7 @@
 package othello;
 
 public class AIPlayer extends Player {
-    public AIPlayer(String name, int piece) {
+    public AIPlayer(String name, Piece piece) {
         super(name, piece);
     }
 
