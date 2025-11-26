@@ -56,21 +56,27 @@ public class OthelloView extends Application {
 
     // Đặt 4 quân cờ khởi đầu
     private void placeInitialPieces() {
-        setPieceAt(3, 3, Color.WHITESMOKE);
-        setPieceAt(4, 4, Color.WHITESMOKE);
-        setPieceAt(3, 4, Color.BLACK);
-        setPieceAt(4, 3, Color.BLACK);
+        updateCellVisual(3, 3, Piece.WHITE);
+        updateCellVisual(4, 4, Piece.WHITE);
+        updateCellVisual(3, 4, Piece.BLACK);
+        updateCellVisual(4, 3, Piece.BLACK);
         // currentBlack = true; // giữ black đi trước
     }
 
-    private void setPieceAt(int row, int col, Color color) {
+    private void updateCellVisual(int row, int col, Piece piece) {
         if (row < 0 || row >= cellButtons.length || col < 0 || col >= cellButtons[0].length) return;
         Button cell = cellButtons[row][col];
-        if (cell == null) return;
-        Circle piece = new Circle(CELL_SIZE * 0.35);
-        piece.setFill(color);
-        piece.setStroke(color == Color.BLACK ? Color.web("#222") : Color.web("#ccc"));
-        cell.setGraphic(piece);
+
+        if (piece == null) {
+            cell.setGraphic(null); // Ô trống
+        } else {
+            Circle circle = new Circle(CELL_SIZE * 0.35);
+            circle.setFill(piece.getColor()); // Lấy màu từ Enum
+            // Logic viền cho đẹp
+            circle.setStroke(piece == Piece.BLACK ? Color.web("#222") : Color.web("#ccc"));
+            circle.setStrokeWidth(2);
+            cell.setGraphic(circle);
+        }
     }
 
     public static void main(String[] args) {

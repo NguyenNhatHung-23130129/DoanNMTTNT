@@ -2,9 +2,9 @@ package othello;
 
 public abstract class Player {
     private String name;
-    private int piece;
+    private Piece piece;
 
-    public Player(String name, int piece) {
+    public Player(String name, Piece piece) {
         this.name = name;
         this.piece = piece;
     }
@@ -13,7 +13,7 @@ public abstract class Player {
         return name;
     }
 
-    public int getPiece() {
+    public Piece getPiece() {
         return piece;
     }
     public abstract boolean makeMove(Board board, int column, int row);
