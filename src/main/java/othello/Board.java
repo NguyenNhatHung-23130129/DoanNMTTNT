@@ -3,63 +3,59 @@ package othello;
 public class Board {
     private int rows;
     private int columns;
-    private Piece[][] grid;
+
+    private Piece[][] board;
+
 
     public Board(int rows, int columns) {
         this.rows = rows;
         this.columns = columns;
-        this.grid = new Piece[rows][columns];
+
+        this.board = new Piece[rows][columns];
+
     }
+    public boolean canPlacePiece(int rowIndex, int colIndex, Piece piece) {
+        if (board[rowIndex][colIndex] != null) return false; // Ô phải trống
 
-    public Piece getPieceAt(int r, int c) {
-        return grid[r][c];
-    }
+        int[] dirRow = {-1, -1, -1, 0, 0, 1, 1, 1};
+        int[] dirCol = {-1, 0, 1, -1, 1, -1, 0, 1};
 
-    public void setPieceAt(int r, int c, Piece piece) {
-        grid[r][c] = piece;
-    }
-
-
-   //kiểm tra lật cờ
-    public void flipPieces(int row, int col, Piece piece) {
-        // 8 hướng
-        int[][] directions = {
-                {-1, 0}, {1, 0}, {0, -1}, {0, 1},
-                {-1, -1}, {-1, 1}, {1, -1}, {1, 1}
-        };
-
-        Piece opponent = (piece == Piece.BLACK) ? Piece.WHITE : Piece.BLACK;
-
-        // kiểm tra duyệt 8 hướng
-        for (int[] dir : directions) {
-            int dr = dir[0];
-            int dc = dir[1];
-            int r = row + dr;
-            int c = col + dc;
-            boolean hasOpponent = false;
-
-            // Kiểm tra có quân ở giữa khác màu không
-            while (isValid(r, c) && grid[r][c] == opponent) {
-                hasOpponent = true;
-                r += dr;
-                c += dc;
-            }
-
-            // Nếu có quân khác màu ở giữa và kết thúc bằng quân cùng màu
-            if (hasOpponent && isValid(r, c) && grid[r][c] == piece) {
-                // lật quân
-                r -= dr;
-                c -= dc;
-                while (r != row || c != col) {
-                    grid[r][c] = piece;
-                    r -= dr;
-                    c -= dc;
-                }
+        for (int i = 0; i < 8; i++) {
+            if (canCaptureAlongDirection(rowIndex, colIndex, dirRow[i], dirCol[i], piece)) {
+                return true;
             }
         }
+        return false;
     }
 
-    private boolean isValid(int r, int c) {
-        return r >= 0 && r < rows && c >= 0 && c < columns;
+    //kiem tra xem co the an quan tren huong do khong
+    private boolean canCaptureAlongDirection(int rowIndex, int colIndex, int dRow, int dCol, Piece piece) {
+        Piece opponentPiece = piece.flip();
+        int curRow = rowIndex + dRow;
+        int curCol = colIndex + dCol;
+
+        boolean foundOpponentInBetween = false;
+
+        while (isInsideBoard(curRow, curCol)) {
+            Piece currentCell = board[curRow][curCol];// lay quan o hien tai
+
+            if (currentCell == null) return false; //dung o trong khong hop le
+
+            if (currentCell == opponentPiece) {
+                foundOpponentInBetween = true; // co quan dich o giua
+            } else if (currentCell == piece) {
+                return foundOpponentInBetween; // co the an neu co quan dich o giua
+            }
+
+            curRow += dRow;
+            curCol += dCol;
+        }
+        return false;
     }
+
+    private boolean isInsideBoard(int row, int col) {
+        return row >= 0 && row < rows && col >= 0 && col < columns;
+    }
+
+   
 }
