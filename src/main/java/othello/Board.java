@@ -14,6 +14,20 @@ public class Board {
         this.board = new Piece[rows][columns];
 
     }
+    public void placePiece(int rowIndex, int colIndex, Piece piece) {
+        if (!canPlacePiece(rowIndex, colIndex, piece)) return;
+
+        board[rowIndex][colIndex] = piece;
+
+        int[] dirRow = {-1, -1, -1, 0, 0, 1, 1, 1};
+        int[] dirCol = {-1, 0, 1, -1, 1, -1, 0, 1};
+
+        for (int i = 0; i < 8; i++) {
+            if (canCaptureAlongDirection(rowIndex, colIndex, dirRow[i], dirCol[i], piece)) {
+                captureAlongDirection(rowIndex, colIndex, dirRow[i], dirCol[i], piece);
+            }
+        }
+    }
     public boolean canPlacePiece(int rowIndex, int colIndex, Piece piece) {
         if (board[rowIndex][colIndex] != null) return false; // Ô phải trống
 
@@ -53,9 +67,36 @@ public class Board {
         return false;
     }
 
+    // Lật các quân cờ theo hướng
+    private void captureAlongDirection(int rowIndex, int colIndex, int dRow, int dCol, Piece piece) {
+        int curRow = rowIndex + dRow;
+        int curCol = colIndex + dCol;
+
+        while (isInsideBoard(curRow, curCol)) {
+            Piece currentCell = board[curRow][curCol];
+
+            if (currentCell == piece) {
+                break;
+            }
+
+            board[curRow][curCol] = piece; // Lật quân
+
+            curRow += dRow;
+            curCol += dCol;
+        }
+    }
+
     private boolean isInsideBoard(int row, int col) {
         return row >= 0 && row < rows && col >= 0 && col < columns;
     }
+    public Piece getPiece(int row, int col) {
+        if (!isInsideBoard(row, col)) return null;
+        return board[row][col];
+    }
 
-   
+    public void setPiece(int row, int col, Piece piece) {
+        if (isInsideBoard(row, col)) {
+            board[row][col] = piece;
+        }
+    }
 }

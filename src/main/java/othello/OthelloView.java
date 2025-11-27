@@ -2,9 +2,14 @@ package othello;
 
 import javafx.application.Application;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
@@ -14,18 +19,57 @@ public class OthelloView extends Application {
     private Scene scene;
     private GridPane boardPane;
     private Button[][] cellButtons;
-    private boolean currentBlack = true;
+    private Board board;
+    private Piece currentPlayer = Piece.BLACK;
     private final int DEFAULT_SIZE = 8;
     private final int CELL_SIZE = 64;
+
+    private Label statusLabel;
+    private Label scoreLabel;
 
     @Override
     public void start(Stage primaryStage) {
         this.stage = primaryStage;
+        this.board = new Board(DEFAULT_SIZE, DEFAULT_SIZE);
+
+        BorderPane root = new BorderPane();
+
+
         showBoardUI(DEFAULT_SIZE, DEFAULT_SIZE);
-        placeInitialPieces(); // đặt 4 quân cờ khởi đầu
-        stage.setTitle("Othello");
+        root.setCenter(boardPane);
+
+
+        HBox statusBar = createStatusBar();
+        root.setTop(statusBar);
+
+
+        placeInitialPieces();
+
+
+        updateAllCells();
+        updateStatusBar();
+
+        scene = new Scene(root);
+        stage.setTitle("Othello Game");
         stage.setScene(scene);
         stage.show();
+    }
+
+    private HBox createStatusBar() {
+        HBox statusBar = new HBox(20);
+        statusBar.setPadding(new Insets(10));
+        statusBar.setAlignment(Pos.CENTER);
+        statusBar.setStyle("-fx-background-color: #f0f0f0;");
+
+        statusLabel = new Label("Lượt: ĐEN");
+
+
+        scoreLabel = new Label("Đen: 2 | Trắng: 2");
+        scoreLabel.setStyle("-fx-font-size: 14px;");
+
+
+        statusBar.getChildren().addAll(statusLabel, scoreLabel);
+        return statusBar;
     }
 
     public void showBoardUI(int rows, int cols) {
@@ -43,40 +87,141 @@ public class OthelloView extends Application {
                 cell.setPrefSize(CELL_SIZE, CELL_SIZE);
                 cell.setMinSize(CELL_SIZE, CELL_SIZE);
                 cell.setMaxSize(CELL_SIZE, CELL_SIZE);
-                cell.setStyle("-fx-background-color: #2E8B57; " + "-fx-border-color: black; " + "-fx-border-width: 1;"
-                );
+                cell.setStyle("-fx-background-color: #2E8B57; " +
+                        "-fx-border-color: black; " +
+                        "-fx-border-width: 1;");
+
+                final int row = r;
+                final int col = c;
+
+                // click
+                cell.setOnAction(e -> handleCellClick(row, col));
+
+
+
+                cell.setOnMouseExited(e -> {
+                    if (board.getPiece(row, col) == null) {
+                        cell.setStyle("-fx-background-color: #2E8B57; " +
+                                "-fx-border-color: black; " +
+                                "-fx-border-width: 1;");
+                    }
+                });
 
                 cellButtons[r][c] = cell;
                 boardPane.add(cell, c, r);
             }
         }
-
-        scene = new Scene(boardPane);
     }
 
-    // Đặt 4 quân cờ khởi đầu
+    private void handleCellClick(int row, int col) {
+
+
+        // Kiểm tra đặt quân
+        if (!board.canPlacePiece(row, col, currentPlayer)) {
+            showAlert("Nước đi không hợp lệ", "Không thể đặt quân cờ tại vị trí này!");
+            return;
+        }
+
+
+        board.placePiece(row, col, currentPlayer);
+
+
+        updateAllCells();
+
+        // Đổi lượt
+        currentPlayer = currentPlayer.flip();
+
+
+        if (!hasValidMove(currentPlayer)) {
+            currentPlayer = currentPlayer.flip(); // Đổi lại lượt
+
+            if (!hasValidMove(currentPlayer)) {
+
+
+                return;
+            } else {
+                showAlert("Thông báo", "Đối thủ không có nước đi hợp lệ. Bạn tiếp tục!");
+            }
+        }
+
+        updateStatusBar();
+    }
+
+    private boolean hasValidMove(Piece player) {
+        for (int r = 0; r < DEFAULT_SIZE; r++) {
+            for (int c = 0; c < DEFAULT_SIZE; c++) {
+                if (board.getPiece(r, c) == null && board.canPlacePiece(r, c, player)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private void placeInitialPieces() {
-        updateCellVisual(3, 3, Piece.WHITE);
-        updateCellVisual(4, 4, Piece.WHITE);
-        updateCellVisual(3, 4, Piece.BLACK);
-        updateCellVisual(4, 3, Piece.BLACK);
-        // currentBlack = true; // giữ black đi trước
+        // Đặt 4 quân khởi đầu - cập nhật vào Board
+        board.setPiece(3, 3, Piece.WHITE);
+        board.setPiece(4, 4, Piece.WHITE);
+        board.setPiece(3, 4, Piece.BLACK);
+        board.setPiece(4, 3, Piece.BLACK);
+    }
+
+    private void updateAllCells() {
+        for (int r = 0; r < DEFAULT_SIZE; r++) {
+            for (int c = 0; c < DEFAULT_SIZE; c++) {
+                updateCellVisual(r, c, board.getPiece(r, c));
+            }
+        }
     }
 
     private void updateCellVisual(int row, int col, Piece piece) {
-        if (row < 0 || row >= cellButtons.length || col < 0 || col >= cellButtons[0].length) return;
+        if (row < 0 || row >= cellButtons.length ||
+                col < 0 || col >= cellButtons[0].length) return;
+
         Button cell = cellButtons[row][col];
 
         if (piece == null) {
-            cell.setGraphic(null); // Ô trống
+            cell.setGraphic(null);
         } else {
             Circle circle = new Circle(CELL_SIZE * 0.35);
-            circle.setFill(piece.getColor()); // Lấy màu từ Enum
-            // Logic viền cho đẹp
+            circle.setFill(piece.getColor());
             circle.setStroke(piece == Piece.BLACK ? Color.web("#222") : Color.web("#ccc"));
             circle.setStrokeWidth(2);
             cell.setGraphic(circle);
         }
+    }
+
+    private void updateStatusBar() {
+        String playerName = (currentPlayer == Piece.BLACK) ? "ĐEN" : "TRẮNG";
+        statusLabel.setText("Lượt: " + playerName);
+
+        int blackCount = countPieces(Piece.BLACK);
+        int whiteCount = countPieces(Piece.WHITE);
+        scoreLabel.setText("Đen: " + blackCount + " | Trắng: " + whiteCount);
+    }
+
+    private int countPieces(Piece piece) {
+        int count = 0;
+        for (int r = 0; r < DEFAULT_SIZE; r++) {
+            for (int c = 0; c < DEFAULT_SIZE; c++) {
+                if (board.getPiece(r, c) == piece) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+
+
+
+
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     public static void main(String[] args) {
