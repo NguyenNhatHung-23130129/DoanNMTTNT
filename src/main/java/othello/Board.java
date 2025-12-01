@@ -28,6 +28,7 @@ public class Board {
             }
         }
     }
+    //kiem tra xem co the dat quan o vi tri do khong
     public boolean canPlacePiece(int rowIndex, int colIndex, Piece piece) {
         if (board[rowIndex][colIndex] != null) return false; // Ô phải trống
 

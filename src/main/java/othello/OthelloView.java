@@ -1,15 +1,15 @@
 package othello;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
@@ -32,18 +32,20 @@ public class OthelloView extends Application {
         this.stage = primaryStage;
         this.board = new Board(DEFAULT_SIZE, DEFAULT_SIZE);
 
-        BorderPane root = new BorderPane();
 
+        BorderPane root = new BorderPane();
+        MenuBar menuBar = createMenuBar();
+        HBox statusBar = createStatusBar();
 
         showBoardUI(DEFAULT_SIZE, DEFAULT_SIZE);
         root.setCenter(boardPane);
+        VBox topContainer = new VBox(menuBar, statusBar);
 
-
-        HBox statusBar = createStatusBar();
-        root.setTop(statusBar);
+        root.setTop(topContainer);
 
 
         placeInitialPieces();
+
 
 
         updateAllCells();
@@ -53,6 +55,28 @@ public class OthelloView extends Application {
         stage.setTitle("Othello Game");
         stage.setScene(scene);
         stage.show();
+    }
+
+    private MenuBar createMenuBar() {
+        MenuItem itemNew = new MenuItem("New Game");
+        MenuItem itemSave = new MenuItem("Save Game");
+        MenuItem itemExit = new MenuItem("Exit");
+
+        itemNew.setOnAction(e -> {
+            System.out.println("New Game clicked");
+            // resetGame();
+        });
+
+        itemExit.setOnAction(e -> Platform.exit());
+
+        Menu gameMenu = new Menu("Game");
+
+        gameMenu.getItems().addAll(itemNew, new SeparatorMenuItem(), itemSave, new SeparatorMenuItem(), itemExit);
+
+        MenuBar menuBar = new MenuBar();
+        menuBar.getMenus().add(gameMenu);
+
+        return menuBar;
     }
 
     private HBox createStatusBar() {
