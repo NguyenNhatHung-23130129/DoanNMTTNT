@@ -100,4 +100,27 @@ public class Board {
             board[row][col] = piece;
         }
     }
+
+    public int getRows() {
+        return rows;
+    }
+
+    public int getColumns() {
+        return columns;
+    }
+
+    public boolean isOver() {
+        return false;
+
+    }
+
+    public Board cloneBoard() {
+        Board newBoard = new Board(this.rows, this.columns);
+        for (int r = 0; r < this.rows; r++) {
+            for (int c = 0; c < this.columns; c++) {
+                newBoard.setPiece(r, c, this.getPiece(r, c));
+            }
+        }
+        return newBoard;
+    }
 }

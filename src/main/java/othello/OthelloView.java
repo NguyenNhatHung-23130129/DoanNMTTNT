@@ -21,7 +21,7 @@ public class OthelloView extends Application {
     private Button[][] cellButtons;
     private Board board;
     private Piece currentPlayer = Piece.BLACK;
-    private final int DEFAULT_SIZE = 4;
+    private final int DEFAULT_SIZE = 8;
     private final int CELL_SIZE = 64;
 
     private Label statusLabel;
@@ -45,7 +45,6 @@ public class OthelloView extends Application {
 
 
         placeInitialPieces();
-
 
 
         updateAllCells();
@@ -121,11 +120,16 @@ public class OthelloView extends Application {
                 // click
                 cell.setOnAction(e -> handleCellClick(row, col));
 
-
-
+                cell.setOnMouseEntered(e -> {
+                    if (board.getPiece(row, col) == null) {
+                        cell.setStyle("-fx-background-color: #32CD32; " +
+                                "-fx-border-color: black; " +
+                                "-fx-border-width: 1;");
+                    }
+                });
                 cell.setOnMouseExited(e -> {
                     if (board.getPiece(row, col) == null) {
-                        cell.setStyle("-fx-background-color: #2E8B57; " +
+                        cell.setStyle("-fx-background-color:  #2E8B57; " +
                                 "-fx-border-color: black; " +
                                 "-fx-border-width: 1;");
                     }
@@ -184,10 +188,10 @@ public class OthelloView extends Application {
 
     private void placeInitialPieces() {
         // Đặt 4 quân khởi đầu - cập nhật vào Board
-        board.setPiece(DEFAULT_SIZE/2 -1 , DEFAULT_SIZE/2-1 , Piece.WHITE);
-        board.setPiece(DEFAULT_SIZE/2  , DEFAULT_SIZE/2 , Piece.WHITE);
-        board.setPiece(DEFAULT_SIZE/2  , DEFAULT_SIZE/2 -1, Piece.BLACK);
-        board.setPiece(DEFAULT_SIZE/2 -1, DEFAULT_SIZE/2 , Piece.BLACK);
+        board.setPiece(DEFAULT_SIZE / 2 - 1, DEFAULT_SIZE / 2 - 1, Piece.WHITE);
+        board.setPiece(DEFAULT_SIZE / 2, DEFAULT_SIZE / 2, Piece.WHITE);
+        board.setPiece(DEFAULT_SIZE / 2, DEFAULT_SIZE / 2 - 1, Piece.BLACK);
+        board.setPiece(DEFAULT_SIZE / 2 - 1, DEFAULT_SIZE / 2, Piece.BLACK);
     }
 
     private void updateAllCells() {
@@ -209,6 +213,7 @@ public class OthelloView extends Application {
         } else {
             Circle circle = new Circle(CELL_SIZE * 0.35);
             circle.setFill(piece.getColor());
+            //tao vien cho quan co
             circle.setStroke(piece == Piece.BLACK ? Color.web("#222") : Color.web("#ccc"));
             circle.setStrokeWidth(2);
             cell.setGraphic(circle);
@@ -235,9 +240,6 @@ public class OthelloView extends Application {
         }
         return count;
     }
-
-
-
 
 
     private void showAlert(String title, String message) {
