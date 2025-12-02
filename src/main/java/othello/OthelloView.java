@@ -21,17 +21,36 @@ public class OthelloView extends Application {
     private Button[][] cellButtons;
     private Board board;
     private Piece currentPlayer = Piece.BLACK;
-    private final int DEFAULT_SIZE = 4;
+    private final int DEFAULT_SIZE = 8;
     private final int CELL_SIZE = 64;
 
     private Label statusLabel;
     private Label scoreLabel;
+    private boolean gameOver = false;
+
+    // Player types
+    private PlayerType blackPlayerType = PlayerType.HUMAN;
+    private PlayerType whitePlayerType = PlayerType.HUMAN;
+
+    private enum PlayerType {
+        HUMAN("Người"),
+        COMPUTER("Máy");
+
+        private final String displayName;
+
+        PlayerType(String displayName) {
+            this.displayName = displayName;
+        }
+
+        public String getDisplayName() {
+            return displayName;
+        }
+    }
 
     @Override
     public void start(Stage primaryStage) {
         this.stage = primaryStage;
         this.board = new Board(DEFAULT_SIZE, DEFAULT_SIZE);
-
 
         BorderPane root = new BorderPane();
         MenuBar menuBar = createMenuBar();
@@ -43,12 +62,9 @@ public class OthelloView extends Application {
 
         root.setTop(topContainer);
 
-
         placeInitialPieces();
-
-
-
         updateAllCells();
+        showValidMoveHints();
         updateStatusBar();
 
         scene = new Scene(root);
@@ -62,15 +78,15 @@ public class OthelloView extends Application {
         MenuItem itemSave = new MenuItem("Save Game");
         MenuItem itemExit = new MenuItem("Exit");
 
-        itemNew.setOnAction(e -> {
-            System.out.println("New Game clicked");
-            // resetGame();
+        itemNew.setOnAction(e -> resetGame());
+
+        itemSave.setOnAction(e -> {
+            showAlert("Lưu game", "Chức năng lưu game chưa được triển khai!");
         });
 
         itemExit.setOnAction(e -> Platform.exit());
 
         Menu gameMenu = new Menu("Game");
-
         gameMenu.getItems().addAll(itemNew, new SeparatorMenuItem(), itemSave, new SeparatorMenuItem(), itemExit);
 
         MenuBar menuBar = new MenuBar();
@@ -80,20 +96,90 @@ public class OthelloView extends Application {
     }
 
     private HBox createStatusBar() {
-        HBox statusBar = new HBox(20);
+        HBox statusBar = new HBox(15);
         statusBar.setPadding(new Insets(10));
         statusBar.setAlignment(Pos.CENTER);
         statusBar.setStyle("-fx-background-color: #f0f0f0;");
 
-        statusLabel = new Label("Lượt: ĐEN");
+        // Nút chọn người chơi
+        Button playerSelectButton = new Button("Chọn người chơi");
+        playerSelectButton.setStyle("-fx-font-size: 12px;");
+        playerSelectButton.setOnAction(e -> showPlayerSelectionDialog());
 
+        statusLabel = new Label("Lượt: ĐEN");
+        statusLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
 
         scoreLabel = new Label("Đen: 2 | Trắng: 2");
         scoreLabel.setStyle("-fx-font-size: 14px;");
 
+        // Nút reset
+        Button resetButton = new Button("Reset Game");
+        resetButton.setStyle("-fx-font-size: 12px;");
+        resetButton.setOnAction(e -> resetGame());
 
-        statusBar.getChildren().addAll(statusLabel, scoreLabel);
+        statusBar.getChildren().addAll(playerSelectButton, statusLabel, scoreLabel, resetButton);
         return statusBar;
+    }
+
+    private void showPlayerSelectionDialog() {
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Chọn người chơi");
+
+        VBox content = new VBox(15);
+        content.setPadding(new Insets(20));
+
+        HBox whiteBox = new HBox(10);
+        whiteBox.setAlignment(Pos.CENTER_LEFT);
+        Label whiteLabel = new Label("Quân Trắng:");
+
+
+        ToggleGroup whiteGroup = new ToggleGroup();
+        RadioButton whiteHuman = new RadioButton("Người");
+        RadioButton whiteComputer = new RadioButton("Máy");
+        whiteHuman.setToggleGroup(whiteGroup);
+        whiteComputer.setToggleGroup(whiteGroup);
+
+        if (whitePlayerType == PlayerType.HUMAN) {
+            whiteHuman.setSelected(true);
+        } else {
+            whiteComputer.setSelected(true);
+        }
+
+        whiteBox.getChildren().addAll(whiteLabel, whiteHuman, whiteComputer);
+
+
+        HBox blackBox = new HBox(10);
+        blackBox.setAlignment(Pos.CENTER_LEFT);
+        Label blackLabel = new Label("Quân Đen:");
+
+
+        ToggleGroup blackGroup = new ToggleGroup();
+        RadioButton blackHuman = new RadioButton("Người");
+        RadioButton blackComputer = new RadioButton("Máy");
+        blackHuman.setToggleGroup(blackGroup);
+        blackComputer.setToggleGroup(blackGroup);
+
+        if (blackPlayerType == PlayerType.HUMAN) {
+            blackHuman.setSelected(true);
+        } else {
+            blackComputer.setSelected(true);
+        }
+
+        blackBox.getChildren().addAll(blackLabel, blackHuman, blackComputer);
+
+        content.getChildren().addAll(whiteBox, blackBox);
+        dialog.getDialogPane().setContent(content);
+
+        ButtonType okButton = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+        ButtonType cancelButton = new ButtonType("Hủy", ButtonBar.ButtonData.CANCEL_CLOSE);
+        dialog.getDialogPane().getButtonTypes().addAll(okButton, cancelButton);
+
+        dialog.showAndWait().ifPresent(response -> {
+            if (response == okButton) {
+                whitePlayerType = whiteHuman.isSelected() ? PlayerType.HUMAN : PlayerType.COMPUTER;
+                blackPlayerType = blackHuman.isSelected() ? PlayerType.HUMAN : PlayerType.COMPUTER;
+            }
+        });
     }
 
     public void showBoardUI(int rows, int cols) {
@@ -118,16 +204,26 @@ public class OthelloView extends Application {
                 final int row = r;
                 final int col = c;
 
-                // click
                 cell.setOnAction(e -> handleCellClick(row, col));
 
-
+                cell.setOnMouseEntered(e -> {
+                    if (!gameOver && board.getPiece(row, col) == null &&
+                            board.canPlacePiece(row, col, currentPlayer)) {
+                        cell.setStyle("-fx-background-color: #2E8B57; " +
+                                "-fx-border-color: black; " +
+                                "-fx-border-width: 2;");
+                    }
+                });
 
                 cell.setOnMouseExited(e -> {
                     if (board.getPiece(row, col) == null) {
                         cell.setStyle("-fx-background-color: #2E8B57; " +
                                 "-fx-border-color: black; " +
                                 "-fx-border-width: 1;");
+
+                        if (!gameOver && board.canPlacePiece(row, col, currentPlayer)) {
+                            showHintAtCell(row, col);
+                        }
                     }
                 });
 
@@ -138,37 +234,65 @@ public class OthelloView extends Application {
     }
 
     private void handleCellClick(int row, int col) {
-
-
-        // Kiểm tra đặt quân
-        if (!board.canPlacePiece(row, col, currentPlayer)) {
-            showAlert("Nước đi không hợp lệ", "Không thể đặt quân cờ tại vị trí này!");
+        if (gameOver) {
             return;
         }
 
+        if (!board.canPlacePiece(row, col, currentPlayer)) {
+            return;
+        }
 
         board.placePiece(row, col, currentPlayer);
-
-
         updateAllCells();
 
-        // Đổi lượt
         currentPlayer = currentPlayer.flip();
 
-
         if (!hasValidMove(currentPlayer)) {
-            currentPlayer = currentPlayer.flip(); // Đổi lại lượt
+            currentPlayer = currentPlayer.flip();
 
             if (!hasValidMove(currentPlayer)) {
-
-
+                endGame();
                 return;
-            } else {
-                showAlert("Thông báo", "Đối thủ không có nước đi hợp lệ. Bạn tiếp tục!");
             }
         }
 
+        showValidMoveHints();
         updateStatusBar();
+    }
+
+    private void showValidMoveHints() {
+
+        clearAllHints();
+
+
+        for (int r = 0; r < DEFAULT_SIZE; r++) {
+            for (int c = 0; c < DEFAULT_SIZE; c++) {
+                if (board.getPiece(r, c) == null && board.canPlacePiece(r, c, currentPlayer)) {
+                    showHintAtCell(r, c);
+                }
+            }
+        }
+    }
+
+    private void showHintAtCell(int row, int col) {
+        Button cell = cellButtons[row][col];
+        if (cell.getGraphic() == null) {
+            Circle hint = new Circle(2);
+            hint.setFill(Color.BLACK);
+            hint.setStroke(Color.BLACK);
+            hint.setStrokeWidth(2);
+            cell.setGraphic(hint);
+        }
+    }
+
+    private void clearAllHints() {
+        for (int r = 0; r < DEFAULT_SIZE; r++) {
+            for (int c = 0; c < DEFAULT_SIZE; c++) {
+                if (board.getPiece(r, c) == null) {
+                    cellButtons[r][c].setGraphic(null);
+                }
+            }
+        }
     }
 
     private boolean hasValidMove(Piece player) {
@@ -182,12 +306,90 @@ public class OthelloView extends Application {
         return false;
     }
 
+    private void endGame() {
+        gameOver = true;
+        clearAllHints();
+
+        int blackCount = countPieces(Piece.BLACK);
+        int whiteCount = countPieces(Piece.WHITE);
+
+
+        Dialog<ButtonType> resultDialog = new Dialog<>();
+        resultDialog.setTitle("Kết thúc Game");
+
+        VBox content = new VBox(20);
+        content.setPadding(new Insets(30));
+        content.setAlignment(Pos.CENTER);
+        content.setStyle("-fx-background-color: white;");
+
+
+        Label resultLabel = new Label();
+        resultLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
+
+        if (blackCount > whiteCount) {
+            resultLabel.setText("QUÂN ĐEN THẮNG");
+            resultLabel.setTextFill(Color.web("#2C3E50"));
+        } else if (whiteCount > blackCount) {
+            resultLabel.setText("QUÂN TRẮNG THẮNG ");
+            resultLabel.setTextFill(Color.web("#2C3E50"));
+        } else {
+            resultLabel.setText("HÒA️");
+            resultLabel.setTextFill(Color.web("#7F8C8D"));
+        }
+
+        VBox scoreBox = new VBox(10);
+        scoreBox.setAlignment(Pos.CENTER);
+        scoreBox.setStyle("-fx-background-color: #ECF0F1; -fx-padding: 20; -fx-background-radius: 10;");
+
+        Label blackScoreLabel = new Label("⚫ Quân Đen: " + blackCount);
+        blackScoreLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+
+        Label whiteScoreLabel = new Label("⚪ Quân Trắng: " + whiteCount);
+        whiteScoreLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+
+
+
+        scoreBox.getChildren().addAll(blackScoreLabel, whiteScoreLabel);
+
+        content.getChildren().addAll(resultLabel, scoreBox);
+        resultDialog.getDialogPane().setContent(content);
+
+        ButtonType playAgainButton = new ButtonType("Chơi lại", ButtonBar.ButtonData.OK_DONE);
+        ButtonType exitButton = new ButtonType("Thoát", ButtonBar.ButtonData.CANCEL_CLOSE);
+        resultDialog.getDialogPane().getButtonTypes().addAll(playAgainButton, exitButton);
+
+
+        resultDialog.getDialogPane().lookupButton(playAgainButton).setStyle(
+                "-fx-background-color: #27AE60; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 10 20;"
+        );
+
+        resultDialog.showAndWait().ifPresent(response -> {
+            if (response == playAgainButton) {
+                resetGame();
+            } else {
+                Platform.exit();
+            }
+        });
+
+        statusLabel.setText("Game kết thúc");
+    }
+
+    private void resetGame() {
+        board = new Board(DEFAULT_SIZE, DEFAULT_SIZE);
+        currentPlayer = Piece.BLACK;
+        gameOver = false;
+
+        placeInitialPieces();
+        updateAllCells();
+        showValidMoveHints();
+        updateStatusBar();
+    }
+
     private void placeInitialPieces() {
-        // Đặt 4 quân khởi đầu - cập nhật vào Board
-        board.setPiece(DEFAULT_SIZE/2 -1 , DEFAULT_SIZE/2-1 , Piece.WHITE);
-        board.setPiece(DEFAULT_SIZE/2  , DEFAULT_SIZE/2 , Piece.WHITE);
-        board.setPiece(DEFAULT_SIZE/2  , DEFAULT_SIZE/2 -1, Piece.BLACK);
-        board.setPiece(DEFAULT_SIZE/2 -1, DEFAULT_SIZE/2 , Piece.BLACK);
+        board.setPiece(DEFAULT_SIZE/2 - 1, DEFAULT_SIZE/2 - 1, Piece.WHITE);
+        board.setPiece(DEFAULT_SIZE/2, DEFAULT_SIZE/2, Piece.WHITE);
+        board.setPiece(DEFAULT_SIZE/2, DEFAULT_SIZE/2 - 1, Piece.BLACK);
+        board.setPiece(DEFAULT_SIZE/2 - 1, DEFAULT_SIZE/2, Piece.BLACK);
     }
 
     private void updateAllCells() {
@@ -235,10 +437,6 @@ public class OthelloView extends Application {
         }
         return count;
     }
-
-
-
-
 
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
