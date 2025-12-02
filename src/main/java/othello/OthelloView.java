@@ -21,7 +21,7 @@ public class OthelloView extends Application {
     private Button[][] cellButtons;
     private Board board;
     private Piece currentPlayer = Piece.BLACK;
-    private final int DEFAULT_SIZE = 8;
+    private final int DEFAULT_SIZE = 4;
     private final int CELL_SIZE = 64;
 
     private Label statusLabel;
@@ -184,10 +184,10 @@ public class OthelloView extends Application {
 
     private void placeInitialPieces() {
         // Đặt 4 quân khởi đầu - cập nhật vào Board
-        board.setPiece(3, 3, Piece.WHITE);
-        board.setPiece(4, 4, Piece.WHITE);
-        board.setPiece(3, 4, Piece.BLACK);
-        board.setPiece(4, 3, Piece.BLACK);
+        board.setPiece(DEFAULT_SIZE/2 -1 , DEFAULT_SIZE/2-1 , Piece.WHITE);
+        board.setPiece(DEFAULT_SIZE/2  , DEFAULT_SIZE/2 , Piece.WHITE);
+        board.setPiece(DEFAULT_SIZE/2  , DEFAULT_SIZE/2 -1, Piece.BLACK);
+        board.setPiece(DEFAULT_SIZE/2 -1, DEFAULT_SIZE/2 , Piece.BLACK);
     }
 
     private void updateAllCells() {
