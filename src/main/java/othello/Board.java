@@ -110,8 +110,22 @@ public class Board {
     }
 
     public boolean isOver() {
-        return false;
+        // Kiểm tra xem cả hai người chơi đều không có nước đi hợp lệ
+        boolean blackHasMove = false;
+        boolean whiteHasMove = false;
 
+        for (int r = 0; r < rows && (!blackHasMove || !whiteHasMove); r++) {
+            for (int c = 0; c < columns && (!blackHasMove || !whiteHasMove); c++) {
+                if (!blackHasMove && canPlacePiece(r, c, Piece.BLACK)) {
+                    blackHasMove = true;
+                }
+                if (!whiteHasMove && canPlacePiece(r, c, Piece.WHITE)) {
+                    whiteHasMove = true;
+                }
+            }
+        }
+
+        return !blackHasMove && !whiteHasMove;
     }
 
     public Board cloneBoard() {
@@ -122,5 +136,28 @@ public class Board {
             }
         }
         return newBoard;
+    }
+
+    public boolean isFull() {
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < columns; c++) {
+                if (board[r][c] == null) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public int countPieces(Piece piece) {
+        int count = 0;
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < columns; c++) {
+                if (board[r][c] == piece) {
+                    count++;
+                }
+            }
+        }
+        return count;
     }
 }
