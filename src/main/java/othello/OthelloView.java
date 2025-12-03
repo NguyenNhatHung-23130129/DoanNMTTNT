@@ -248,13 +248,6 @@ public class OthelloView extends Application {
         alert.showAndWait();
     }
 
-    public void showPassTurnAlert() {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Thông báo");
-        alert.setHeaderText(null);
-        alert.setContentText("Đối thủ không có nước đi hợp lệ. Bạn tiếp tục!");
-        alert.showAndWait();
-    }
 
     public void showGameOverAlert(String winner, int blackCount, int whiteCount) {
         Dialog<ButtonType> resultDialog = new Dialog<>();

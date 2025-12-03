@@ -63,16 +63,10 @@ public class OthelloController {
         // Đổi lượt
         switchPlayer();
 
-        // Kiểm tra nếu người chơi hiện tại không có nước đi
+        // Kiểm tra nếu người chơi tiếp theo không có nước đi -> kết thúc game ngay lập tức
         if (!hasValidMove(currentPlayer.getPiece())) {
-            switchPlayer(); // Đổi lại lượt
-
-            if (!hasValidMove(currentPlayer.getPiece())) {
-                endGame();
-                return;
-            } else {
-                view.showPassTurnAlert();
-            }
+            endGame();
+            return;
         }
 
         view.updateStatus(currentPlayer.getPiece(), board.countPieces(Piece.BLACK), board.countPieces(Piece.WHITE));
@@ -113,19 +107,10 @@ public class OthelloController {
                 // Đổi lượt
                 switchPlayer();
 
-                // Kiểm tra nếu người chơi tiếp theo không có nước đi
+                // Kiểm tra nếu người chơi tiếp theo không có nước đi -> kết thúc game ngay lập tức
                 if (!hasValidMove(currentPlayer.getPiece())) {
-                    switchPlayer(); // Đổi lại cho AI
-
-                    if (!hasValidMove(currentPlayer.getPiece())) {
-                        endGame();
-                        return;
-                    } else {
-                        view.showPassTurnAlert();
-                        // AI tiếp tục đi
-                        makeAIMove();
-                        return;
-                    }
+                    endGame();
+                    return;
                 }
 
                 view.updateStatus(currentPlayer.getPiece(), board.countPieces(Piece.BLACK), board.countPieces(Piece.WHITE));
@@ -136,6 +121,9 @@ public class OthelloController {
                 if (checkGameEnd()) {
                     endGame();
                 }
+            } else {
+                // AI không có nước đi: theo quy tắc mới, kết thúc game
+                endGame();
             }
         }
     }
