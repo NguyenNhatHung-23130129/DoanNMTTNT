@@ -5,9 +5,12 @@ public class HumanPlayer extends Player {
         super(name, piece);
     }
 
-
     @Override
-    public boolean makeMove(Board board, int column, int row) {
+    public boolean makeMove(Board board, int row, int col) {
+        if (board.canPlacePiece(row, col, this.getPiece())) {
+            board.placePiece(row, col, this.getPiece());
+            return true;
+        }
         return false;
     }
 }
