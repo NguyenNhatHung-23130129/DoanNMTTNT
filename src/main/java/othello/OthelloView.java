@@ -110,7 +110,8 @@ public class OthelloView extends Application {
 
         dialog.showAndWait().ifPresent(response -> {
             if (response == pvpButton) {
-                controller.initializeGame(DEFAULT_SIZE, false, 4);
+                // pass a default algorithm when not using AI
+                controller.initializeGame(DEFAULT_SIZE, false, 4, AIPlayer.Algorithm.MINIMAX);
             } else if (response == pvaButton) {
                 showDifficultyDialog();
             }
@@ -129,17 +130,29 @@ public class OthelloView extends Application {
 
         dialog.getDialogPane().getButtonTypes().addAll(easyButton, mediumButton, hardButton, cancelButton);
 
+        // Add algorithm choice controls
+        ToggleGroup algoGroup = new ToggleGroup();
+        RadioButton rbMinimax = new RadioButton("Minimax");
+        RadioButton rbAlphaBeta = new RadioButton("Alpha-Beta");
+        rbMinimax.setToggleGroup(algoGroup);
+        rbAlphaBeta.setToggleGroup(algoGroup);
+        rbMinimax.setSelected(true); // default
+
         VBox content = new VBox(10);
         content.setPadding(new Insets(20));
         content.getChildren().addAll(
                 new Label("Dễ: AI suy nghĩ ít (Depth 2)"),
                 new Label("Trung bình: AI suy nghĩ vừa (Depth 4)"),
-                new Label("Khó: AI suy nghĩ nhiều (Depth 6)")
+                new Label("Khó: AI suy nghĩ nhiều (Depth 6)"),
+                new Separator(),
+                new Label("Chọn thuật toán cho AI:"),
+                rbMinimax,
+                rbAlphaBeta
         );
         dialog.getDialogPane().setContent(content);
 
         dialog.showAndWait().ifPresent(response -> {
-            int depth = 4;
+            int depth;
             if (response == easyButton) {
                 depth = 2;
             } else if (response == mediumButton) {
@@ -149,7 +162,8 @@ public class OthelloView extends Application {
             } else {
                 return;
             }
-            controller.initializeGame(DEFAULT_SIZE, true, depth);
+            AIPlayer.Algorithm algorithm = rbMinimax.isSelected() ? AIPlayer.Algorithm.MINIMAX : AIPlayer.Algorithm.ALPHABETA;
+            controller.initializeGame(DEFAULT_SIZE, true, depth, algorithm);
         });
     }
 

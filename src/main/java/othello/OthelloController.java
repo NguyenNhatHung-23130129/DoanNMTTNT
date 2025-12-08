@@ -16,7 +16,8 @@ public class OthelloController {
         this.view = view;
     }
 
-    public void initializeGame(int size, boolean aiMode, int depth) {
+    // change signature to accept algorithm (ignored for PvP)
+    public void initializeGame(int size, boolean aiMode, int depth, AIPlayer.Algorithm algorithm) {
         this.isAIMode = aiMode;
         this.aiDepth = depth;
         this.gameOver = false;
@@ -26,7 +27,7 @@ public class OthelloController {
         this.player1 = new HumanPlayer("Player 1", Piece.BLACK);
 
         if (isAIMode) {
-            this.player2 = new AIPlayer("AI", Piece.WHITE, depth);
+            this.player2 = new AIPlayer("AI", Piece.WHITE, depth, algorithm);
         } else {
             this.player2 = new HumanPlayer("Player 2", Piece.WHITE);
         }
@@ -63,7 +64,7 @@ public class OthelloController {
         // Đổi lượt
         switchPlayer();
 
-        // Kiểm tra nếu người chơi tiếp theo không có nước đi -> kết thúc game ngay lập tức
+        // Kiểm tra nếu người chơi hiện tại không có nước đi
         if (!hasValidMove(currentPlayer.getPiece())) {
             endGame();
             return;
@@ -107,11 +108,13 @@ public class OthelloController {
                 // Đổi lượt
                 switchPlayer();
 
-                // Kiểm tra nếu người chơi tiếp theo không có nước đi -> kết thúc game ngay lập tức
-                if (!hasValidMove(currentPlayer.getPiece())) {
-                    endGame();
-                    return;
-                }
+                // Kiểm tra nếu người chơi tiếp theo không có nước đi
+
+                    if (!hasValidMove(currentPlayer.getPiece())) {
+                        endGame();
+                        return;
+                    }
+
 
                 view.updateStatus(currentPlayer.getPiece(), board.countPieces(Piece.BLACK), board.countPieces(Piece.WHITE));
                 view.showValidMoveHints(board, currentPlayer.getPiece());
@@ -121,9 +124,6 @@ public class OthelloController {
                 if (checkGameEnd()) {
                     endGame();
                 }
-            } else {
-                // AI không có nước đi: theo quy tắc mới, kết thúc game
-                endGame();
             }
         }
     }
@@ -160,7 +160,7 @@ public class OthelloController {
         } else {
             winner = "HÒA";
         }
-
+    view.updateStatus(currentPlayer.getPiece(), blackCount, whiteCount);
         view.showGameOverAlert(winner, blackCount, whiteCount);
     }
 
@@ -168,11 +168,5 @@ public class OthelloController {
         return board;
     }
 
-    public Player getCurrentPlayer() {
-        return currentPlayer;
-    }
 
-    public boolean isGameOver() {
-        return gameOver;
-    }
 }

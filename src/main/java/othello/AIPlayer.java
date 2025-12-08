@@ -12,7 +12,11 @@ public class AIPlayer extends Player {
             {20, -3, 11, 8, 8, 11, -3, 20}
     };
 
+    // Add algorithm selection
+    public enum Algorithm { MINIMAX, ALPHABETA }
+
     private int defaultDepth = 4;
+    private Algorithm algorithm = Algorithm.MINIMAX; // default
 
     public AIPlayer(String name, Piece piece) {
         super(name, piece);
@@ -21,6 +25,13 @@ public class AIPlayer extends Player {
     public AIPlayer(String name, Piece piece, int depth) {
         super(name, piece);
         this.defaultDepth = depth;
+    }
+
+    // new constructor with algorithm
+    public AIPlayer(String name, Piece piece, int depth, Algorithm algorithm) {
+        super(name, piece);
+        this.defaultDepth = depth;
+        this.algorithm = algorithm;
     }
 
     @Override
@@ -33,35 +44,7 @@ public class AIPlayer extends Player {
         return false;
     }
 
-    public int[] calculateBestMove(Board board, int depth) {
-        int bestValue = Integer.MIN_VALUE;
-        int bestRow = -1;
-        int bestCol = -1;
-
-        for (int r = 0; r < board.getRows(); r++) {
-            for (int c = 0; c < board.getColumns(); c++) {
-                if (board.canPlacePiece(r, c, this.getPiece())) {
-                    Board newBoard = board.cloneBoard();
-                    newBoard.placePiece(r, c, this.getPiece());
-
-                    int value = minimax(false, newBoard, depth - 1, Integer.MIN_VALUE, Integer.MAX_VALUE);
-
-                    if (value > bestValue) {
-                        bestValue = value;
-                        bestRow = r;
-                        bestCol = c;
-                    }
-                }
-            }
-        }
-
-        if (bestRow != -1 && bestCol != -1) {
-            return new int[]{bestRow, bestCol};
-        }
-        return null;
-    }
-
-    private int minimax(boolean maxmin, Board board, int depth, int alpha, int beta) {
+    private int alphaBeta(boolean maxmin, Board board, int depth, int alpha, int beta) {
         if (depth == 0 || board.isOver()) {
             return heuristic(board);
         }
@@ -73,7 +56,7 @@ public class AIPlayer extends Player {
                     if (board.canPlacePiece(r, c, this.getPiece())) {
                         Board newBoard = board.cloneBoard();
                         newBoard.placePiece(r, c, this.getPiece());
-                        int value = minimax(false, newBoard, depth - 1, alpha, beta);
+                        int value = alphaBeta(false, newBoard, depth - 1, alpha, beta);
                         temp = Math.max(temp, value);
                         alpha = Math.max(alpha, value);
                         if (beta <= alpha) {
@@ -91,7 +74,7 @@ public class AIPlayer extends Player {
                     if (board.canPlacePiece(r, c, opponentPiece)) {
                         Board newBoard = board.cloneBoard();
                         newBoard.placePiece(r, c, opponentPiece);
-                        int value = minimax(true, newBoard, depth - 1, alpha, beta);
+                        int value = alphaBeta(true, newBoard, depth - 1, alpha, beta);
                         temp = Math.min(temp, value);
                         beta = Math.min(beta, value);
                         if (beta <= alpha) {
@@ -102,6 +85,76 @@ public class AIPlayer extends Player {
             }
             return temp;
         }
+    }
+    private int minimax(boolean maxmin, Board board, int depth) {
+        if (depth == 0 || board.isOver()) {
+            return heuristic(board);
+        }
+
+        if (maxmin) {
+            int temp = Integer.MIN_VALUE;
+            for (int r = 0; r < board.getRows(); r++) {
+                for (int c = 0; c < board.getColumns(); c++) {
+                    if (board.canPlacePiece(r, c, this.getPiece())) {
+                        Board newBoard = board.cloneBoard();
+                        newBoard.placePiece(r, c, this.getPiece());
+                        int value = minimax(false, newBoard, depth - 1);
+                        temp = Math.max(temp, value);
+
+                    }
+                }
+            }
+            return temp;
+        } else {
+            int temp = Integer.MAX_VALUE;
+            Piece opponentPiece = this.getPiece() == Piece.BLACK ? Piece.WHITE : Piece.BLACK;
+            for (int r = 0; r < board.getRows(); r++) {
+                for (int c = 0; c < board.getColumns(); c++) {
+                    if (board.canPlacePiece(r, c, opponentPiece)) {
+                        Board newBoard = board.cloneBoard();
+                        newBoard.placePiece(r, c, opponentPiece);
+                        int value = minimax(true, newBoard, depth - 1);
+                        temp = Math.min(temp, value);
+
+                    }
+                }
+            }
+            return temp;
+        }
+    }
+
+    public int[] calculateBestMove(Board board, int depth) {
+        int bestValue = Integer.MIN_VALUE;
+        int bestRow = -1;
+        int bestCol = -1;
+
+        for (int r = 0; r < board.getRows(); r++) {
+            for (int c = 0; c < board.getColumns(); c++) {
+                if (board.canPlacePiece(r, c, this.getPiece())) {
+                    Board newBoard = board.cloneBoard();
+                    newBoard.placePiece(r, c, this.getPiece());
+
+                    int value;
+                    // choose algorithm based on setting
+                    if (this.algorithm == Algorithm.ALPHABETA) {
+                        value = alphaBeta(false, newBoard, depth - 1, Integer.MIN_VALUE, Integer.MAX_VALUE);
+                    } else {
+                        value = minimax(false, newBoard, depth - 1);
+                    }
+
+                    if (value > bestValue) {
+                        bestValue = value;
+                        bestRow = r;
+                        bestCol = c;
+                    }
+                }
+            }
+        }
+
+        if (bestRow != -1 && bestCol != -1) {
+            return new int[]{bestRow, bestCol};
+        }
+        return null;
     }
 
     private int heuristic(Board board) {
