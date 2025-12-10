@@ -124,6 +124,12 @@ public class AIPlayer extends Player {
     }
 
     public int[] calculateBestMove(Board board, int depth) {
+
+        System.gc(); // don rac bo nho
+      double startMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+        double startTime = System.nanoTime();
+
+
         int bestValue = Integer.MIN_VALUE;
         int bestRow = -1;
         int bestCol = -1;
@@ -150,6 +156,17 @@ public class AIPlayer extends Player {
                 }
             }
         }
+        long endTime = System.nanoTime();
+        long endMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+
+        double duration = (endTime - startTime) / 1_000_000;
+        double memoryUsed = (endMemory - startMemory) / 1024;
+
+        System.out.println("--------------------------------------------------");
+        System.out.println("Algorithm: " + this.algorithm + " | Depth: " + depth);
+        System.out.println("Time: " + duration + " ms");
+        System.out.println("Memory Diff: " + memoryUsed + " KB ");
+        System.out.println("--------------------------------------------------");
 
         if (bestRow != -1 && bestCol != -1) {
             return new int[]{bestRow, bestCol};
