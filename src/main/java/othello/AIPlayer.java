@@ -173,6 +173,28 @@ public class AIPlayer extends Player {
         }
         return null;
     }
+    private boolean isStable(int r, int c, Board board) {
+        int rows = board.getRows();
+        int cols = board.getColumns();
+
+        Piece p = board.getPiece(r, c);
+        if (p == null) return false;
+
+        // co nam o goc
+        if ((r == 0 && c == 0) || (r == 0 && c == cols - 1) || (r == rows - 1 && c == 0) || (r == rows - 1 && c == cols - 1)) {
+            return true;
+        }
+
+        //co nam o bien va khong the lat
+        boolean onEdge = r == 0 || r == rows - 1 || c == 0 || c == cols - 1;
+        if (onEdge) {
+            boolean stableRow = (c > 0 && c < cols - 1) && board.getPiece(r, c - 1) == p && board.getPiece(r, c + 1) == p;
+            boolean stableCol = (r > 0 && r < rows - 1) && board.getPiece(r - 1, c) == p && board.getPiece(r + 1, c) == p;
+            return stableRow || stableCol;
+        }
+
+        return false;
+    }
 
     private int heuristic(Board board) {
         Piece myPiece = this.getPiece();
@@ -182,7 +204,10 @@ public class AIPlayer extends Player {
         int oppScore = 0;
         int myMobility = 0;
         int oppMobility = 0;
-
+        int myEdgeControl = 0;
+        int oppEdgeControl = 0;
+        int myStablePieces = 0;
+        int oppStablePieces = 0;
         for (int r = 0; r < board.getRows(); r++) {
             for (int c = 0; c < board.getColumns(); c++) {
                 Piece p = board.getPiece(r, c);
@@ -193,9 +218,27 @@ public class AIPlayer extends Player {
                 }
                 if (board.canPlacePiece(r, c, myPiece)) myMobility++;
                 if (board.canPlacePiece(r, c, oppPiece)) oppMobility++;
+                // co nam o bien
+                if ((r == 0 || r == board.getRows() - 1 || c == 0 || c == board.getColumns() - 1)) {
+                    if (p == myPiece) {
+                        myEdgeControl++;
+                    } else if (p == oppPiece) {
+                        oppEdgeControl++;
+                    }
+                }
+                // co khong the lat
+                if (isStable(r, c, board)) {
+                    if (p == myPiece) {
+                        myStablePieces++;
+                    } else if (p == oppPiece) {
+                        oppStablePieces++;
+                    }
+                }
+
             }
+
         }
 
-        return (myScore - oppScore) + 10 * (myMobility - oppMobility);
+        return (myScore - oppScore) + 10 * (myMobility - oppMobility)+ 15 * (myEdgeControl - oppEdgeControl) + 20 * (myStablePieces - oppStablePieces);
     }
 }
