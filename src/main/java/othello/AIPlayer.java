@@ -127,7 +127,7 @@ public class AIPlayer extends Player {
 
         System.gc(); // don rac bo nho
       double startMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-        double startTime = System.currentTimeMillis();
+        double startTime = System.nanoTime();
 
 
         int bestValue = Integer.MIN_VALUE;
@@ -155,7 +155,7 @@ public class AIPlayer extends Player {
                 }
             }
         }
-        long endTime = System.currentTimeMillis();
+        long endTime = System.nanoTime();
         long endMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 
         double duration = (endTime - startTime) / 1_000_000;
