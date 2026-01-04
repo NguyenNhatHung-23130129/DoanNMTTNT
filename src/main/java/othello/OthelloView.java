@@ -25,7 +25,7 @@ public class OthelloView extends Application {
     private Label scoreLabel;
 
     private static final String NORMAL_CELL = "-fx-background-color: #2E8B57; -fx-border-color: black; -fx-border-width: 1;";
-    private static final String HINT_CELL = "-fx-background-color: #ADFF2F; -fx-border-color: black; -fx-border-width: 1;";
+    private static final String HINT_CELL = "-fx-background-color: rgba(60, 179, 113, 0.7);" + "-fx-border-color: #00FF7F;" + "-fx-border-width: 2;" + "-fx-effect: dropshadow(gaussian, #00FF7F, 8, 0.5, 0, 0);";
 
     @Override
     public void start(Stage primaryStage) {
@@ -51,34 +51,69 @@ public class OthelloView extends Application {
     }
 
     private MenuBar createMenuBar() {
+        // Game Menu
+        Menu gameMenu = new Menu("Game");
         MenuItem itemNew = new MenuItem("New Game");
         MenuItem itemExit = new MenuItem("Exit");
-
         itemNew.setOnAction(e -> showGameModeDialog());
         itemExit.setOnAction(e -> Platform.exit());
-
-        Menu gameMenu = new Menu("Game");
         gameMenu.getItems().addAll(itemNew, new SeparatorMenuItem(), itemExit);
 
+        // Help Menu
+        Menu helpMenu = new Menu("Help");
+        MenuItem itemRules = new MenuItem("Rules");
+        MenuItem itemAbout = new MenuItem("About");
+        itemRules.setOnAction(e -> {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Luật chơi");
+            alert.setHeaderText("Othello");
+            alert.setContentText("• Đen đi trước\n• Nếu một người chơi không thể thực hiện một nước đi hợp lệ, người chơi đó mất lượt và lượt chuyển sang cho đối thủ.\n• Nếu cả hai người chơi đều không thể thực hiện một nước đi hợp lệ, trò chơi sẽ kết thúc. \n• Ai nhiều quân hơn thắng");
+            alert.showAndWait();
+        });
+        itemAbout.setOnAction(e -> {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("About");
+            alert.setContentText("Othello Game v1.0");
+            alert.showAndWait();
+        });
+        helpMenu.getItems().addAll(itemRules, itemAbout);
+
         MenuBar menuBar = new MenuBar();
-        menuBar.getMenus().add(gameMenu);
+        menuBar.getMenus().addAll(gameMenu, helpMenu);
         return menuBar;
     }
 
     private HBox createStatusBar() {
-        HBox statusBar = new HBox(20);
-        statusBar.setPadding(new Insets(10));
+        HBox statusBar = new HBox(25);
+        statusBar.setPadding(new Insets(12, 20, 12, 20));
         statusBar.setAlignment(Pos.CENTER);
-        statusBar.setStyle("-fx-background-color: #f0f0f0;");
+        statusBar.setStyle("-fx-background-color: #34495E;");
 
-        statusLabel = new Label("Lượt: ĐEN");
-        statusLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
+        // Lượt chơi
+        statusLabel = new Label("⚫ Lượt: ĐEN");
+        statusLabel.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: white;");
 
-        scoreLabel = new Label("Đen: 2 | Trắng: 2");
-        scoreLabel.setStyle("-fx-font-size: 14px;");
+        // Điểm số
+        scoreLabel = new Label("⚫ 2  -  2 ⚪");
+        scoreLabel.setStyle(
+                "-fx-font-size: 15px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-text-fill: white;" +
+                        "-fx-padding: 5 15;" +
+                        "-fx-background-color: rgba(255,255,255,0.1);" +
+                        "-fx-background-radius: 15;"
+        );
 
-        Button resetButton = new Button("Reset Game");
-        resetButton.setStyle("-fx-font-size: 12px;");
+        // Nút Reset
+        Button resetButton = new Button("New Game");
+        resetButton.setStyle(
+                "-fx-font-size: 13px;" +
+                        "-fx-background-color: #27AE60;" +
+                        "-fx-text-fill: white;" +
+                        "-fx-padding: 8 15;" +
+                        "-fx-background-radius: 5;" +
+                        "-fx-cursor: hand;"
+        );
         resetButton.setOnAction(e -> showGameModeDialog());
 
         statusBar.getChildren().addAll(statusLabel, scoreLabel, resetButton);
@@ -88,7 +123,7 @@ public class OthelloView extends Application {
     private void showGameModeDialog() {
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Chọn chế độ chơi");
-        dialog.setHeaderText("Bạn muốn chơi với ai?");
+        dialog.setHeaderText(null);
 
         ButtonType pvpButton = new ButtonType("Người vs Người", ButtonBar.ButtonData.OK_DONE);
         ButtonType pvaButton = new ButtonType("Người vs Máy", ButtonBar.ButtonData.OK_DONE);
@@ -96,21 +131,59 @@ public class OthelloView extends Application {
 
         dialog.getDialogPane().getButtonTypes().addAll(pvpButton, pvaButton, cancelButton);
 
-        VBox content = new VBox(15);
-        content.setPadding(new Insets(20));
+        VBox content = new VBox(20);
+        content.setPadding(new Insets(25));
         content.setAlignment(Pos.CENTER);
 
-        Label label1 = new Label("🎮 Người vs Người: Hai người chơi chơi với nhau");
-        Label label2 = new Label("🤖 Người vs Máy: Chơi với AI");
-        label1.setStyle("-fx-font-size: 13px;");
-        label2.setStyle("-fx-font-size: 13px;");
+        // Tiêu đề
+        Label titleLabel = new Label("Chọn Chế Độ Chơi");
+        titleLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
 
-        content.getChildren().addAll(label1, label2);
+        // Card PvP
+        VBox pvpCard = new VBox(8);
+        pvpCard.setPadding(new Insets(15));
+        pvpCard.setAlignment(Pos.CENTER);
+        pvpCard.setStyle(
+                "-fx-background-color: #E8F5E9;" +
+                        "-fx-background-radius: 10;" +
+                        "-fx-border-color: #4CAF50;" +
+                        "-fx-border-radius: 10;" +
+                        "-fx-border-width: 1;"
+        );
+        Label pvpTitle = new Label("Người vs Người");
+        pvpTitle.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
+        Label pvpDesc = new Label("Hai người chơi với nhau");
+        pvpDesc.setStyle("-fx-font-size: 12px; -fx-text-fill: #666;");
+        pvpCard.getChildren().addAll( pvpTitle, pvpDesc);
+
+        // Card PvAI
+        VBox pvaCard = new VBox(8);
+        pvaCard.setPadding(new Insets(15));
+        pvaCard.setAlignment(Pos.CENTER);
+        pvaCard.setStyle(
+                "-fx-background-color: #E3F2FD;" +
+                        "-fx-background-radius: 10;" +
+                        "-fx-border-color: #2196F3;" +
+                        "-fx-border-radius: 10;" +
+                        "-fx-border-width: 1;"
+        );
+        Label pvaTitle = new Label("Người vs Máy");
+        pvaTitle.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
+        Label pvaDesc = new Label("Chơi với AI thông minh");
+        pvaDesc.setStyle("-fx-font-size: 12px; -fx-text-fill: #666;");
+        pvaCard.getChildren().addAll( pvaTitle, pvaDesc);
+
+        // Đặt 2 card cạnh nhau
+        HBox cardsBox = new HBox(15);
+        cardsBox.setAlignment(Pos.CENTER);
+        cardsBox.getChildren().addAll(pvpCard, pvaCard);
+
+        content.getChildren().addAll(titleLabel, cardsBox);
         dialog.getDialogPane().setContent(content);
+        dialog.getDialogPane().setPrefWidth(400);
 
         dialog.showAndWait().ifPresent(response -> {
             if (response == pvpButton) {
-                // pass a default algorithm when not using AI
                 controller.initializeGame(DEFAULT_SIZE, false, 4, AIPlayer.Algorithm.MINIMAX);
             } else if (response == pvaButton) {
                 showDifficultyDialog();
@@ -121,50 +194,91 @@ public class OthelloView extends Application {
     private void showDifficultyDialog() {
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Chọn độ khó");
-        dialog.setHeaderText("Chọn độ khó của AI");
+        dialog.setHeaderText(null);
 
-        ButtonType easyButton = new ButtonType("Dễ", ButtonBar.ButtonData.OK_DONE);
-        ButtonType mediumButton = new ButtonType("Trung bình", ButtonBar.ButtonData.OK_DONE);
-        ButtonType hardButton = new ButtonType("Khó", ButtonBar.ButtonData.OK_DONE);
+        ButtonType easyButton = new ButtonType("Dễ", ButtonBar.ButtonData.LEFT);
+        ButtonType mediumButton = new ButtonType("Trung bình", ButtonBar.ButtonData.LEFT);
+        ButtonType hardButton = new ButtonType("Khó", ButtonBar.ButtonData.LEFT);
         ButtonType cancelButton = new ButtonType("Hủy", ButtonBar.ButtonData.CANCEL_CLOSE);
 
         dialog.getDialogPane().getButtonTypes().addAll(easyButton, mediumButton, hardButton, cancelButton);
 
-        // them lua chon thuat toan
+        VBox content = new VBox(15);
+        content.setPadding(new Insets(25));
+
+        // Tiêu đề
+        Label titleLabel = new Label("Chọn Độ Khó AI");
+        titleLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+
+        // Các mức độ khó
+        VBox difficultyBox = new VBox(10);
+        difficultyBox.setPadding(new Insets(10));
+        difficultyBox.setStyle(
+                "-fx-background-color: #F5F5F5;" +
+                        "-fx-background-radius: 8;"
+        );
+
+        HBox easyRow = createDifficultyRow( "Dễ", "AI suy nghĩ nhanh (Depth 2)", "#4CAF50");
+        HBox mediumRow = createDifficultyRow( "Trung bình", "AI suy nghĩ vừa (Depth 4)", "#FF9800");
+        HBox hardRow = createDifficultyRow( "Khó", "AI suy nghĩ sâu (Depth 6)", "#F44336");
+
+        difficultyBox.getChildren().addAll(easyRow, mediumRow, hardRow);
+
+        // Separator
+        Separator separator = new Separator();
+        separator.setPadding(new Insets(5, 0, 5, 0));
+
+        // Thuật toán
+        Label algoLabel = new Label("Thuật toán AI:");
+        algoLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
+
         ToggleGroup algoGroup = new ToggleGroup();
         RadioButton rbMinimax = new RadioButton("Minimax");
         RadioButton rbAlphaBeta = new RadioButton("Alpha-Beta");
         rbMinimax.setToggleGroup(algoGroup);
         rbAlphaBeta.setToggleGroup(algoGroup);
-        rbMinimax.setSelected(true); // default
+        rbAlphaBeta.setSelected(true);
 
-        VBox content = new VBox(10);
-        content.setPadding(new Insets(20));
-        content.getChildren().addAll(
-                new Label("Dễ: AI suy nghĩ ít (Depth 2)"),
-                new Label("Trung bình: AI suy nghĩ vừa (Depth 4)"),
-                new Label("Khó: AI suy nghĩ nhiều (Depth 6)"),
-                new Separator(),
-                new Label("Chọn thuật toán cho AI:"),
-                rbMinimax,
-                rbAlphaBeta
-        );
+        rbMinimax.setStyle("-fx-font-size: 13px;");
+        rbAlphaBeta.setStyle("-fx-font-size: 13px;");
+
+        HBox algoBox = new HBox(20);
+        algoBox.setPadding(new Insets(10, 0, 0, 0));
+        algoBox.getChildren().addAll(rbMinimax, rbAlphaBeta);
+
+        content.getChildren().addAll(titleLabel, difficultyBox, separator, algoLabel, algoBox);
         dialog.getDialogPane().setContent(content);
+        dialog.getDialogPane().setPrefWidth(380);
 
         dialog.showAndWait().ifPresent(response -> {
             int depth;
-            if (response == easyButton) {
-                depth = 2;
-            } else if (response == mediumButton) {
-                depth = 4;
-            } else if (response == hardButton) {
-                depth = 6;
-            } else {
-                return;
-            }
-            AIPlayer.Algorithm algorithm = rbMinimax.isSelected() ? AIPlayer.Algorithm.MINIMAX : AIPlayer.Algorithm.ALPHABETA;
+            if (response == easyButton) depth = 2;
+            else if (response == mediumButton) depth = 4;
+            else if (response == hardButton) depth = 6;
+            else return;
+
+            AIPlayer.Algorithm algorithm = rbMinimax.isSelected()
+                    ? AIPlayer.Algorithm.MINIMAX
+                    : AIPlayer.Algorithm.ALPHABETA;
             controller.initializeGame(DEFAULT_SIZE, true, depth, algorithm);
         });
+    }
+
+    private HBox createDifficultyRow( String title, String desc, String color) {
+        HBox row = new HBox(10);
+        row.setAlignment(Pos.CENTER_LEFT);
+        row.setPadding(new Insets(8));
+
+
+        VBox textBox = new VBox(2);
+        Label titleLabel = new Label(title);
+        titleLabel.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: " + color + ";");
+        Label descLabel = new Label(desc);
+        descLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #666;");
+        textBox.getChildren().addAll(titleLabel, descLabel);
+
+        row.getChildren().addAll(textBox);
+        return row;
     }
 
     public void showBoardUI(int rows, int cols) {
@@ -223,9 +337,10 @@ public class OthelloView extends Application {
     }
 
     public void updateStatus(Piece currentPiece, int blackCount, int whiteCount) {
+        String icon = (currentPiece == Piece.BLACK) ? "⚫" : "⚪";
         String playerName = (currentPiece == Piece.BLACK) ? "ĐEN" : "TRẮNG";
-        statusLabel.setText("Lượt: " + playerName);
-        scoreLabel.setText("Đen: " + blackCount + " | Trắng: " + whiteCount);
+        statusLabel.setText(icon + " Lượt: " + playerName);
+        scoreLabel.setText("⚫ " + blackCount + "  -  " + whiteCount + " ⚪");
     }
 
     public void showValidMoveHints(Board board, Piece currentPlayer) {
@@ -270,23 +385,45 @@ public class OthelloView extends Application {
         VBox content = new VBox(20);
         content.setPadding(new Insets(30));
         content.setAlignment(Pos.CENTER);
-        content.setStyle("-fx-background-color: white;");
 
+
+
+        // Kết quả
         Label resultLabel = new Label(winner);
-        resultLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
+        resultLabel.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #2C3E50;");
 
-        VBox scoreBox = new VBox(10);
+        // Điểm số
+        HBox scoreBox = new HBox(30);
         scoreBox.setAlignment(Pos.CENTER);
-        scoreBox.setStyle("-fx-background-color: #ECF0F1; -fx-padding: 20; -fx-background-radius: 10;");
+        scoreBox.setPadding(new Insets(15));
+        scoreBox.setStyle("-fx-background-color: #ECF0F1; -fx-background-radius: 10;");
 
-        Label blackScoreLabel = new Label("⚫ Quân Đen: " + blackCount);
-        blackScoreLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+        VBox blackBox = new VBox(5);
+        blackBox.setAlignment(Pos.CENTER);
+        Label blackIcon = new Label("⚫");
+        blackIcon.setStyle("-fx-font-size: 25px;");
+        Label blackScore = new Label(String.valueOf(blackCount));
+        blackScore.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
+        Label blackLabel = new Label("Đen");
+        blackLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #666;");
+        blackBox.getChildren().addAll(blackIcon, blackScore, blackLabel);
 
-        Label whiteScoreLabel = new Label("⚪ Quân Trắng: " + whiteCount);
-        whiteScoreLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+        Label vsLabel = new Label("vs");
+        vsLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: #999;");
 
-        scoreBox.getChildren().addAll(blackScoreLabel, whiteScoreLabel);
-        content.getChildren().addAll(resultLabel, scoreBox);
+        VBox whiteBox = new VBox(5);
+        whiteBox.setAlignment(Pos.CENTER);
+        Label whiteIcon = new Label("⚪");
+        whiteIcon.setStyle("-fx-font-size: 25px;");
+        Label whiteScore = new Label(String.valueOf(whiteCount));
+        whiteScore.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
+        Label whiteLabel = new Label("Trắng");
+        whiteLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #666;");
+        whiteBox.getChildren().addAll(whiteIcon, whiteScore, whiteLabel);
+
+        scoreBox.getChildren().addAll(blackBox, vsLabel, whiteBox);
+
+        content.getChildren().addAll( resultLabel, scoreBox);
         resultDialog.getDialogPane().setContent(content);
 
         ButtonType playAgainButton = new ButtonType("Chơi lại", ButtonBar.ButtonData.OK_DONE);
@@ -316,6 +453,19 @@ public class OthelloView extends Application {
                 cellButtons[r][c].setDisable(false);
             }
         }
+    }
+
+    // Thông báo khi không có nước đi hợp lệ, xác nhận trước khi chuyển lượt
+    public void showNoValidMoveAlert(String playerName, Runnable onConfirm) {
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Không có nước đi hợp lệ");
+            alert.setHeaderText(null);
+            alert.setContentText("Người chơi " + playerName + " không có nước đi hợp lệ và sẽ bị mất lượt.\nNhấn OK để tiếp tục.");
+            alert.getButtonTypes().setAll(ButtonType.OK);
+            alert.showAndWait();
+            if (onConfirm != null) onConfirm.run();
+        });
     }
 
     public static void main(String[] args) {
