@@ -130,7 +130,7 @@ public class OthelloView extends Application {
 
         dialog.getDialogPane().getButtonTypes().addAll(easyButton, mediumButton, hardButton, cancelButton);
 
-        // Add algorithm choice controls
+        // them lua chon thuat toan
         ToggleGroup algoGroup = new ToggleGroup();
         RadioButton rbMinimax = new RadioButton("Minimax");
         RadioButton rbAlphaBeta = new RadioButton("Alpha-Beta");
