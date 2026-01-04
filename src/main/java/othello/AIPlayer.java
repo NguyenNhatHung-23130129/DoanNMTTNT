@@ -13,7 +13,7 @@ public class AIPlayer extends Player {
     };
 
     // them enum de chon thuat toan
-    public enum Algorithm { MINIMAX, ALPHABETA }
+    public enum Algorithm {MINIMAX, ALPHABETA}
 
     private int defaultDepth = 4;
     private Algorithm algorithm = Algorithm.MINIMAX; // default
@@ -86,6 +86,7 @@ public class AIPlayer extends Player {
             return temp;
         }
     }
+
     private int minimax(boolean maxmin, Board board, int depth) {
         if (depth == 0 || board.isOver()) {
             return heuristic(board);
@@ -126,7 +127,7 @@ public class AIPlayer extends Player {
     public int[] calculateBestMove(Board board, int depth) {
 
         System.gc(); // don rac bo nho
-      double startMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+        double startMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
         double startTime = System.nanoTime();
 
 
@@ -172,27 +173,65 @@ public class AIPlayer extends Player {
         }
         return null;
     }
-    private boolean isStable(int r, int c, Board board) {
+
+
+    private int calculateStability(Board board, Piece p) {
+        int stableCount = 0;
         int rows = board.getRows();
         int cols = board.getColumns();
 
-        Piece p = board.getPiece(r, c);
-        if (p == null) return false;
 
-        // co nam o goc
-        if ((r == 0 && c == 0) || (r == 0 && c == cols - 1) || (r == rows - 1 && c == 0) || (r == rows - 1 && c == cols - 1)) {
-            return true;
+        int[][] edges = {
+                {0, 0, 0, 1},   //hang tren
+                {rows - 1, 0, 0, 1}, //hang duoi
+                {0, 0, 1, 0},  //cot trai
+                {0, cols - 1, 1, 0} //cot phai
+        };
+
+        for (int[] edge : edges) {
+            int rStart = edge[0];
+            int cStart = edge[1];
+            int dr = edge[2];
+            int dc = edge[3];
+
+            int length = (dr == 0) ? cols : rows;// do dai canh
+
+            boolean startCornerOwned = (board.getPiece(rStart, cStart) == p);
+            int forwardCount = 0;
+
+            if (startCornerOwned) {
+                for (int i = 0; i < length; i++) {
+                    if (board.getPiece(rStart + i * dr, cStart + i * dc) == p) {
+                        forwardCount++;
+                    } else {
+                        break;
+                    }
+                }
+            }
+            stableCount += forwardCount;
+            // kiem tra tu duoi len
+            int rEnd = rStart + (length - 1) * dr;
+            int cEnd = cStart + (length - 1) * dc;
+            boolean endCornerOwned = (board.getPiece(rEnd, cEnd) == p);
+
+            if (endCornerOwned) {
+                for (int i = 0; i < length; i++) {
+                    int rCurr = rEnd - i * dr;
+                    int cCurr = cEnd - i * dc;
+
+                    if (board.getPiece(rCurr, cCurr) == p) {
+
+                        if (forwardCount + i < length) {// tranh dem trung
+                            stableCount++;
+                        }
+                    } else {
+                        break;
+                    }
+                }
+            }
         }
 
-        //co nam o bien va khong the lat
-        boolean onEdge = r == 0 || r == rows - 1 || c == 0 || c == cols - 1;
-        if (onEdge) {
-            boolean stableRow = (c > 0 && c < cols - 1) && board.getPiece(r, c - 1) == p && board.getPiece(r, c + 1) == p;
-            boolean stableCol = (r > 0 && r < rows - 1) && board.getPiece(r - 1, c) == p && board.getPiece(r + 1, c) == p;
-            return stableRow || stableCol;
-        }
-
-        return false;
+        return stableCount;
     }
 
     private int heuristic(Board board) {
@@ -203,41 +242,29 @@ public class AIPlayer extends Player {
         int oppScore = 0;
         int myMobility = 0;
         int oppMobility = 0;
-        int myEdgeControl = 0;
-        int oppEdgeControl = 0;
-        int myStablePieces = 0;
-        int oppStablePieces = 0;
+
         for (int r = 0; r < board.getRows(); r++) {
             for (int c = 0; c < board.getColumns(); c++) {
                 Piece p = board.getPiece(r, c);
+
+                // tinh diem bang WEIGHTS
                 if (p == myPiece) {
                     myScore += WEIGHTS[r][c];
                 } else if (p == oppPiece) {
                     oppScore += WEIGHTS[r][c];
                 }
+
+                // tinh Mobility (so nuoc di hop le)
                 if (board.canPlacePiece(r, c, myPiece)) myMobility++;
                 if (board.canPlacePiece(r, c, oppPiece)) oppMobility++;
-                // co nam o bien
-                if ((r == 0 || r == board.getRows() - 1 || c == 0 || c == board.getColumns() - 1)) {
-                    if (p == myPiece) {
-                        myEdgeControl++;
-                    } else if (p == oppPiece) {
-                        oppEdgeControl++;
-                    }
-                }
-                // co khong the lat
-                if (isStable(r, c, board)) {
-                    if (p == myPiece) {
-                        myStablePieces++;
-                    } else if (p == oppPiece) {
-                        oppStablePieces++;
-                    }
-                }
-
             }
-
         }
 
-        return 10*(myScore - oppScore) + 15 * (myMobility - oppMobility)+  (myEdgeControl - oppEdgeControl) +  10*(myStablePieces - oppStablePieces);
+        //  tinh diem Stable
+        int myStable = calculateStability(board, myPiece);
+        int oppStable = calculateStability(board, oppPiece);
+
+
+        return 10 * (myScore - oppScore) + 20 * (myMobility - oppMobility) + 30 * (myStable - oppStable);
     }
 }
