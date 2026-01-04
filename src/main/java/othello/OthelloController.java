@@ -16,7 +16,7 @@ public class OthelloController {
         this.view = view;
     }
 
-    // change signature to accept algorithm (ignored for PvP)
+
     public void initializeGame(int size, boolean aiMode, int depth, AIPlayer.Algorithm algorithm) {
         this.isAIMode = aiMode;
         this.aiDepth = depth;
@@ -41,9 +41,8 @@ public class OthelloController {
         board.setPiece(size / 2 - 1, size / 2, Piece.BLACK);
 
         view.updateBoard(board);
-        view.updateStatus(currentPlayer.getPiece(), board.countPieces(Piece.BLACK), board.countPieces(Piece.WHITE));
-        view.enableBoard();
-        view.showValidMoveHints(board, currentPlayer.getPiece());
+        // Bắt đầu lượt đầu tiên với logic skip turn nếu không có nước đi
+        startTurn();
     }
 
     public void handlePlayerMove(int row, int col) {
@@ -61,37 +60,7 @@ public class OthelloController {
         board.placePiece(row, col, piece);
         view.updateBoard(board);
 
-        // Đổi lượt
-        switchPlayer();
-
-        // Kiểm tra nếu người chơi hiện tại không có nước đi
-        if (!hasValidMove(currentPlayer.getPiece())) {
-            endGame();
-            return;
-        }
-
-        view.updateStatus(currentPlayer.getPiece(), board.countPieces(Piece.BLACK), board.countPieces(Piece.WHITE));
-        view.showValidMoveHints(board, currentPlayer.getPiece());
-
-        // Kiểm tra kết thúc game
-        if (checkGameEnd()) {
-            endGame();
-            return;
-        }
-
-        // Nếu là chế độ AI và đến lượt AI
-        if (isAIMode && currentPlayer instanceof AIPlayer) {
-            view.disableBoard();
-            // Delay để người chơi thấy nước đi của mình
-            new Thread(() -> {
-                try {
-                    Thread.sleep(500);
-                    Platform.runLater(this::makeAIMove);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }).start();
-        }
+        advanceTurnAfterMove();
     }
 
     private void makeAIMove() {
@@ -104,27 +73,67 @@ public class OthelloController {
             if (move != null) {
                 board.placePiece(move[0], move[1], aiPlayer.getPiece());
                 view.updateBoard(board);
-
-                // Đổi lượt
-                switchPlayer();
-
-                // Kiểm tra nếu người chơi tiếp theo không có nước đi
-
-                    if (!hasValidMove(currentPlayer.getPiece())) {
-                        endGame();
-                        return;
-                    }
-
-
-                view.updateStatus(currentPlayer.getPiece(), board.countPieces(Piece.BLACK), board.countPieces(Piece.WHITE));
-                view.showValidMoveHints(board, currentPlayer.getPiece());
-                view.enableBoard();
-
-                // Kiểm tra kết thúc game
-                if (checkGameEnd()) {
-                    endGame();
-                }
             }
+            advanceTurnAfterMove();
+        }
+    }
+
+    private void notifyAndSkipTurnIfNoMove() {
+        if (board != null && board.isFull()) {
+            endGame();
+            return;
+        }
+
+        String playerName = (currentPlayer.getPiece() == Piece.BLACK) ? "ĐEN" : "TRẮNG";
+        view.showNoValidMoveAlert(playerName, () -> {
+            switchPlayer();
+
+            if (hasValidMove(currentPlayer.getPiece())) {
+                startTurn();
+            } else {
+                endGame();
+            }
+        });
+    }
+
+    private void advanceTurnAfterMove() {
+        switchPlayer();
+
+        if (checkGameEnd()) {
+            endGame();
+            return;
+        }
+
+        if (hasValidMove(currentPlayer.getPiece())) {
+            startTurn();
+            return;
+        }
+        view.updateBoard(board);
+
+        notifyAndSkipTurnIfNoMove();
+    }
+
+    private void startTurn() {
+        if (checkGameEnd()) {
+            endGame();
+            return;
+        }
+
+        view.updateStatus(currentPlayer.getPiece(), board.countPieces(Piece.BLACK), board.countPieces(Piece.WHITE));
+        view.showValidMoveHints(board, currentPlayer.getPiece());
+
+        if (isAIMode && currentPlayer instanceof AIPlayer) {
+            view.disableBoard();
+            new Thread(() -> {
+                try {
+                    Thread.sleep(500);
+                    Platform.runLater(this::makeAIMove);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }).start();
+        } else {
+            view.enableBoard();
         }
     }
 
@@ -160,13 +169,12 @@ public class OthelloController {
         } else {
             winner = "HÒA";
         }
-    view.updateStatus(currentPlayer.getPiece(), blackCount, whiteCount);
+        view.updateStatus(currentPlayer.getPiece(), blackCount, whiteCount);
         view.showGameOverAlert(winner, blackCount, whiteCount);
     }
 
     public Board getBoard() {
         return board;
     }
-
 
 }
