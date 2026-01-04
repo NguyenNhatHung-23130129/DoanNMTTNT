@@ -239,6 +239,6 @@ public class AIPlayer extends Player {
 
         }
 
-        return (myScore - oppScore) + 10 * (myMobility - oppMobility)+ 15 * (myEdgeControl - oppEdgeControl) + 20 * (myStablePieces - oppStablePieces);
+        return 10*(myScore - oppScore) + 15 * (myMobility - oppMobility)+  (myEdgeControl - oppEdgeControl) +  10*(myStablePieces - oppStablePieces);
     }
 }
