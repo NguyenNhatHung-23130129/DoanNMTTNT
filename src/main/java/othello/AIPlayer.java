@@ -12,7 +12,7 @@ public class AIPlayer extends Player {
             {20, -3, 11, 8, 8, 11, -3, 20}
     };
 
-    // Add algorithm selection
+    // them enum de chon thuat toan
     public enum Algorithm { MINIMAX, ALPHABETA }
 
     private int defaultDepth = 4;
@@ -27,7 +27,7 @@ public class AIPlayer extends Player {
         this.defaultDepth = depth;
     }
 
-    // new constructor with algorithm
+
     public AIPlayer(String name, Piece piece, int depth, Algorithm algorithm) {
         super(name, piece);
         this.defaultDepth = depth;
@@ -127,7 +127,7 @@ public class AIPlayer extends Player {
 
         System.gc(); // don rac bo nho
       double startMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-        double startTime = System.nanoTime();
+        double startTime = System.currentTimeMillis();
 
 
         int bestValue = Integer.MIN_VALUE;
@@ -141,7 +141,6 @@ public class AIPlayer extends Player {
                     newBoard.placePiece(r, c, this.getPiece());
 
                     int value;
-                    // choose algorithm based on setting
                     if (this.algorithm == Algorithm.ALPHABETA) {
                         value = alphaBeta(false, newBoard, depth - 1, Integer.MIN_VALUE, Integer.MAX_VALUE);
                     } else {
@@ -156,7 +155,7 @@ public class AIPlayer extends Player {
                 }
             }
         }
-        long endTime = System.nanoTime();
+        long endTime = System.currentTimeMillis();
         long endMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 
         double duration = (endTime - startTime) / 1_000_000;
@@ -165,7 +164,7 @@ public class AIPlayer extends Player {
         System.out.println("--------------------------------------------------");
         System.out.println("Algorithm: " + this.algorithm + " | Depth: " + depth);
         System.out.println("Time: " + duration + " ms");
-        System.out.println("Memory Diff: " + memoryUsed + " KB ");
+        System.out.println("Memory: " + memoryUsed + " KB ");
         System.out.println("--------------------------------------------------");
 
         if (bestRow != -1 && bestCol != -1) {
