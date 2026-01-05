@@ -41,8 +41,6 @@ public class OthelloController {
         board.setPiece(size / 2 - 1, size / 2, Piece.BLACK);
 
         view.updateBoard(board);
-        // Bắt đầu lượt đầu tiên với logic skip turn nếu không có nước đi
-        startTurn();
     }
 
     public void handlePlayerMove(int row, int col) {
